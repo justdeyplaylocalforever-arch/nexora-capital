@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>Nexora Capital Ventures</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background:#0a0c10; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+        .phone-frame { 
+            width:100%; max-width:420px; min-height:100vh; background:#0d1117; 
+            margin:0 auto; position:relative; overflow:hidden; 
+            border-left:1px solid #2a2e35; border-right:1px solid #2a2e35;
+            box-shadow:0 0 50px rgba(0,0,0,0.8);
+        }
+        .status-bar { background:#0a0c10; padding:8px 16px; display:flex; justify-content:space-between; font-size:12px; color:#8f9bb3; border-bottom:1px solid #1f2329; }
+        .page { display:none; padding:14px; padding-bottom:85px; overflow-y:auto; height:calc(100vh - 45px); }
+        .page.active { display:block; }
+        .bottom-tab { 
+            position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:420px;
+            background:#0d1117; border-top:1px solid #1f2329; display:flex; justify-content:space-around;
+            padding:8px 0 12px; z-index:1000;
+        }
+        .tab-item { text-align:center; font-size:11px; color:#6b7280; cursor:pointer; padding:4px 10px; transition:0.2s; }
+        .tab-item i { font-size:20px; display:block; margin-bottom:3px; }
+        .tab-item.active { color:#facc15; }
+        .tab-item.active i { color:#facc15; }
+        .card { background:#161b22; border-radius:16px; padding:16px; margin-bottom:12px; border:1px solid #21262d; }
+        .card h3 { font-size:12px; color:#8f9bb3; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.5px; }
+        .wallet-balance { font-size:36px; font-weight:800; color:#facc15; }
+        .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+        .stat-box { background:#0d1117; padding:12px; border-radius:12px; text-align:center; border:1px solid #21262d; }
+        .stat-box .num { font-size:18px; font-weight:700; color:#fff; }
+        .stat-box .label { font-size:10px; color:#6b7280; margin-top:3px; }
+        .stat-box .num.green { color:#10b981; }
+        .stat-box .num.gold { color:#facc15; }
+        .action-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:8px; }
+        .action-btn { background:#21262d; border:none; padding:14px 8px; border-radius:12px; cursor:pointer; text-align:center; transition:0.2s; }
+        .action-btn i { font-size:24px; display:block; margin-bottom:4px; }
+        .action-btn .label { font-size:12px; color:#e2e8f0; font-weight:600; }
+        .action-btn.deposit i { color:#10b981; }
+        .action-btn.invest i { color:#facc15; }
+        .action-btn.withdraw i { color:#f97316; }
+        .action-btn:active { background:#2d333b; }
+        .btn { background:#facc15; color:#0a0c10; border:none; padding:12px 24px; border-radius:30px; font-weight:700; cursor:pointer; display:inline-block; font-size:14px; width:100%; }
+        .btn-outline { background:transparent; border:1px solid #2a2e35; color:#e2e8f0; }
+        .btn-small { padding:8px 16px; font-size:12px; width:auto; }
+        input, select { width:100%; padding:12px; background:#0d1117; border:1px solid #21262d; border-radius:10px; color:#e2e8f0; margin-bottom:10px; font-size:14px; }
+        input:focus { outline:none; border-color:#facc15; }
+        .auth-box { max-width:320px; margin:50px auto 0; }
+        .auth-box h1 { text-align:center; font-size:26px; margin-bottom:5px; }
+        .auth-box .subtitle { text-align:center; color:#6b7280; font-size:13px; margin-bottom:20px; }
+        .ticker-wrap { background:#161b22; padding:8px 12px; border-radius:10px; overflow:hidden; white-space:nowrap; margin-bottom:12px; border:1px solid #21262d; }
+        .ticker-wrap span { display:inline-block; animation:ticker 25s linear infinite; font-size:11px; color:#10b981; }
+        .ticker-wrap span i { margin:0 8px; color:#facc15; }
+        @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-100%)} }
+        .testi-wrap { display:flex; gap:12px; overflow-x:auto; padding-bottom:4px; }
+        .testi-card { min-width:220px; background:#0d1117; padding:14px; border-radius:14px; border:1px solid #21262d; flex-shrink:0; }
+        .testi-card .user { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+        .testi-card .user i { font-size:30px; color:#2a2e35; }
+        .testi-card .stars { color:#facc15; font-size:12px; }
+        .testi-card p { font-size:12px; color:#8f9bb3; }
+        .deposit-details { background:#0d1117; padding:14px; border-radius:12px; margin:14px 0; border:1px solid #21262d; }
+        .deposit-details p { margin:6px 0; font-size:13px; color:#8f9bb3; }
+        .deposit-details strong { color:#e2e8f0; }
+        .deposit-details .acct-num { font-size:22px; color:#facc15; font-weight:700; letter-spacing:2px; }
+        .transaction-item { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #21262d; font-size:13px; }
+        .transaction-item:last-child { border-bottom:none; }
+        .transaction-item .type { color:#8f9bb3; }
+        .transaction-item .amount { font-weight:600; }
+        .transaction-item .amount.credit { color:#10b981; }
+        .transaction-item .amount.debit { color:#f87171; }
+        .transaction-item .status { font-size:11px; padding:2px 8px; border-radius:20px; }
+        .status.pending { color:#f59e0b; background:#2d1f00; }
+        .status.completed { color:#10b981; background:#002b1a; }
+        .hidden-admin-link { font-size:10px; color:#2a2e35; text-align:center; margin-top:20px; cursor:pointer; }
+        .admin-panel { display:none; background:#0d1117; padding:16px; height:calc(100vh - 45px); overflow-y:auto; }
+        .admin-panel.open { display:block; }
+        .admin-panel h2 { color:#facc15; margin-bottom:10px; }
+        .admin-user { background:#161b22; padding:12px; border-radius:10px; margin-bottom:8px; font-size:13px; border-left:3px solid #facc15; }
+        .admin-user .actions { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+        .admin-user input { width:90px; padding:6px; font-size:12px; display:inline; margin:0; }
+        .admin-btn { background:#facc15; color:#000; border:none; padding:4px 10px; border-radius:6px; cursor:pointer; font-size:11px; font-weight:600; }
+        .admin-btn.danger { background:#ef4444; color:#fff; }
+        .admin-btn.green { background:#10b981; color:#fff; }
+        .admin-btn.gray { background:#6b7280; color:#fff; }
+        .whatsapp-float {
+            position:fixed; bottom:85px; right:10px; z-index:9999;
+            width:55px; height:55px; border-radius:50%;
+            background:#25D366; display:flex; align-items:center; justify-content:center;
+            box-shadow:0 4px 15px rgba(37,211,102,0.4); cursor:pointer;
+            transition:0.2s; animation:pulse 2s infinite;
+        }
+        .whatsapp-float i { font-size:30px; color:#fff; }
+        .whatsapp-float:hover { transform:scale(1.1); }
+        @keyframes pulse { 0%{box-shadow:0 4px 15px rgba(37,211,102,0.4)} 50%{box-shadow:0 4px 25px rgba(37,211,102,0.7)} 100%{box-shadow:0 4px 15px rgba(37,211,102,0.4)} }
+        .global-counter { text-align:center; padding:10px; font-size:12px; color:#6b7280; border-top:1px solid #21262d; margin-top:10px; }
+        .global-counter i { color:#facc15; }
+        .plan-card { background:linear-gradient(145deg,#161b22,#0d1117); border-radius:16px; padding:16px; margin-bottom:10px; border:1px solid #21262d; text-align:center; }
+        .plan-card.featured { border:1px solid #facc15; }
+        .plan-card h3 { font-size:16px; color:#facc15; text-transform:none; letter-spacing:0; }
+        .plan-card .price { font-size:28px; font-weight:700; margin:8px 0; }
+        .plan-card .return { font-size:16px; color:#10b981; font-weight:600; }
+        .plan-card .duration { font-size:12px; color:#6b7280; }
+        @media (min-width:420px) { .phone-frame { height:100vh; } }
+        ::-webkit-scrollbar { width:3px; }
+        ::-webkit-scrollbar-track { background:#0d1117; }
+        ::-webkit-scrollbar-thumb { background:#2a2e35; border-radius:10px; }
+    </style>
+</head>
+<body>
+
+<div class="phone-frame" id="app">
+    <div class="status-bar">
+        <span id="status-time">9:41</span>
+        <span><i class="fas fa-signal"></i> <i class="fas fa-wifi"></i> <i class="fas fa-battery-three-quarters"></i></span>
+    </div>
+
+    <div id="page-auth" class="page" style="display:block;padding-top:30px;">
+        <div class="auth-box">
+            <h1 style="color:#facc15;">Nexora Capital</h1>
+            <p class="subtitle"><span style="color:#10b981;">Ventures</span> – Double Your Investment</p>
+            <div id="login-form">
+                <input type="email" id="login-email" placeholder="Email address" />
+                <input type="password" id="login-pass" placeholder="Password" />
+                <button class="btn" onclick="login()">Sign In</button>
+                <p style="text-align:center; margin-top:12px; font-size:13px; color:#6b7280; cursor:pointer;" onclick="showRegister()">Don't have an account? <span style="color:#facc15; font-weight:600;">Register</span></p>
+                <div class="hidden-admin-link" onclick="promptAdmin()">🔧</div>
+            </div>
+            <div id="register-form" style="display:none;">
+                <input type="text" id="reg-name" placeholder="Full name" />
+                <input type="email" id="reg-email" placeholder="Email address" />
+                <input type="password" id="reg-pass" placeholder="Password (min 6 characters)" />
+                <button class="btn" onclick="register()">Create Account</button>
+                <p style="text-align:center; margin-top:12px; font-size:13px; color:#6b7280; cursor:pointer;" onclick="showLogin()">Already have an account? <span style="color:#facc15; font-weight:600;">Sign In</span></p>
+            </div>
+        </div>
+        <div class="global-counter">
+            <i class="fas fa-globe-africa"></i> <span id="global-users">0</span> active investors worldwide
+        </div>
+    </div>
+
+    <div id="page-dashboard" class="page">
+        <div class="ticker-wrap">
+            <span id="live-ticker">🚀 Chidi invested 50,000 <i>•</i> Ngozi earned ₦120,000 <i>•</i> Emeka withdrew ₦80,000 <i>•</i> Fatima deposited ₦100,000 <i>•</i> </span>
+        </div>
+        <div class="card">
+            <h3>Wallet Balance</h3>
+            <div class="wallet-balance" id="display-balance">₦0</div>
+            <div style="font-size:12px; color:#6b7280;">≈ $0.00 USD</div>
+        </div>
+        <div class="grid-3">
+            <div class="stat-box"><div class="num gold" id="display-invested">₦0</div><div class="label">Total Invested</div></div>
+            <div class="stat-box"><div class="num green" id="display-projected">₦0</div><div class="label">Projected Returns</div></div>
+            <div class="stat-box"><div class="num" id="display-active-count">0</div><div class="label">Active Investments</div></div>
+        </div>
+        <div class="action-grid">
+            <button class="action-btn deposit" onclick="switchTab('deposit')"><i class="fas fa-arrow-down"></i><span class="label">Deposit</span></button>
+            <button class="action-btn invest" onclick="switchTab('invest')"><i class="fas fa-chart-line"></i><span class="label">Invest</span></button>
+            <button class="action-btn withdraw" onclick="switchTab('withdraw')"><i class="fas fa-arrow-up"></i><span class="label">Withdraw</span></button>
+        </div>
+        <div class="card">
+            <h3>Recent Transactions</h3>
+            <div id="recent-transactions"><p style="color:#6b7280; font-size:13px; text-align:center; padding:10px;">No recent transactions</p></div>
+        </div>
+    </div>
+
+    <div id="page-invest" class="page">
+        <h2 style="color:#facc15; font-size:20px; margin-bottom:12px;">📈 Investment Plans</h2>
+        <div class="plan-card featured">
+            <h3>🥇 Starter Plan</h3><div class="price" style="color:#facc15;">₦10,000</div><div class="return">→ ₦20,000</div><div class="duration">100% profit in 7 days</div>
+            <button class="btn" style="margin-top:10px;" onclick="investNow(10000)">Invest ₦10,000</button>
+        </div>
+        <div class="plan-card">
+            <h3>🥈 Silver Plan</h3><div class="price" style="color:#facc15;">₦50,000</div><div class="return">→ ₦120,000</div><div class="duration">140% profit in 10 days</div>
+            <button class="btn" style="margin-top:10px;" onclick="investNow(50000)">Invest ₦50,000</button>
+        </div>
+    </div>
+
+    <div id="page-deposit" class="page">
+        <div class="card">
+            <h2 style="color:#facc15; font-size:20px; margin-bottom:6px;">💳 Fund Your Account</h2>
+            <p style="color:#8f9bb3; font-size:13px;">Make a transfer to the account below, then submit.</p>
+            <div class="deposit-details">
+                <p>Bank: <strong>Moniepoint</strong></p>
+                <p>Account Name: <strong>Divine Maduabuchi</strong></p>
+                <p>Account Number: <span class="acct-num">7068876810</span></p>
+            </div>
+            <input type="number" id="deposit-amount" placeholder="Amount (min ₦10,000)" min="10000" />
+            <button class="btn" onclick="submitDeposit()">✅ I Have Paid – Submit for Confirmation</button>
+            <div id="deposit-status" style="margin-top:12px; font-size:13px; color:#10b981;"></div>
+        </div>
+    </div>
+
+    <div id="page-withdraw" class="page">
+        <div class="card">
+            <h2 style="color:#facc15; font-size:20px; margin-bottom:6px;">💸 Withdraw Funds</h2>
+            <input type="text" id="withdraw-bank" placeholder="Bank name" />
+            <input type="text" id="withdraw-acct-name" placeholder="Account name" />
+            <input type="text" id="withdraw-acct-number" placeholder="Account number" />
+            <input type="number" id="withdraw-amount" placeholder="Amount (min ₦5,000)" min="5000" />
+            <button class="btn" onclick="submitWithdraw()">📤 Request Withdrawal</button>
+            <div id="withdraw-status" style="margin-top:12px; font-size:13px; color:#facc15;"></div>
+        </div>
+    </div>
+
+    <div id="page-profile" class="page">
+        <div class="card">
+            <div style="display:flex; align-items:center; gap:14px;">
+                <i class="fas fa-user-circle" style="font-size:55px; color:#21262d;"></i>
+                <div><h3 id="profile-name" style="font-size:18px; color:#fff;">User</h3><p style="color:#8f9bb3; font-size:13px;" id="profile-email">user@email.com</p></div>
+            </div>
+        </div>
+        <div class="card">
+            <button class="btn btn-small btn-outline" style="margin-top:10px;" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="bottom-tab" id="tab-bar" style="display:none;">
+        <div class="tab-item active" data-tab="dashboard" onclick="switchTab('dashboard')"><i class="fas fa-home"></i>Home</div>
+        <div class="tab-item" data-tab="invest" onclick="switchTab('invest')"><i class="fas fa-chart-line"></i>Invest</div>
+        <div class="tab-item" data-tab="deposit" onclick="switchTab('deposit')"><i class="fas fa-wallet"></i>Deposit</div>
+        <div class="tab-item" data-tab="withdraw" onclick="switchTab('withdraw')"><i class="fas fa-arrow-up"></i>Withdraw</div>
+        <div class="tab-item" data-tab="profile" onclick="switchTab('profile')"><i class="fas fa-user"></i>Profile</div>
+    </div>
+
+    <a class="whatsapp-float" href="https://wa.me/2347013357620" target="_blank"><i class="fab fa-whatsapp"></i></a>
+
+    <div class="admin-panel" id="admin-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h2>🔑 Admin Panel</h2>
+            <button class="btn btn-small btn-outline" onclick="closeAdmin()" style="width:auto;">Close</button>
+        </div>
+        <div id="admin-users-list"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js";
+    import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBakqSQzC9KtNhR-Fv6E1n6yiBGoIGgIKs",
+        authDomain: "nexora-investment.firebaseapp.com",
+        projectId: "nexora-investment",
+        storageBucket: "nexora-investment.firebasestorage.app",
+        messagingSenderId: "1090523239496",
+        appId: "1:1090523239496:web:1cf0f80bf225241280747d",
+        measurementId: "G-E1R5E6X7NC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+
+    async function getUsers() {
+        const snapshot = await getDocs(collection(db, "nexora_users"));
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
+
+    async function saveUsers(usersArray) {
+        for (const user of usersArray) {
+            if (user.email) {
+                await setDoc(doc(db, "nexora_users", user.email), user);
+            }
+        }
+    }
+
+    async function getCurrentUser() {
+        const email = sessionStorage.getItem("nexora_session");
+        if (!email) return null;
+        const users = await getUsers();
+        return users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase()) || null;
+    }
+
+    window.showRegister = () => { document.getElementById('login-form').style.display='none'; document.getElementById('register-form').style.display='block'; };
+    window.showLogin = () => { document.getElementById('login-form').style.display='block'; document.getElementById('register-form').style.display='none'; };
+    window.switchTab = switchTab;
+    window.promptAdmin = promptAdmin;
+    window.closeAdmin = closeAdmin;
+
+    window.register = async function() {
+        const name = document.getElementById('reg-name').value.trim();
+        const email = document.getElementById('reg-email').value.trim().toLowerCase();
+        const pass = document.getElementById('reg-pass').value;
+        if(!name||!email||pass.length<6) { alert('Please fill all fields'); return; }
+        
+        let users = await getUsers();
+        if(users.find(u=>u.email===email)) { alert('Email already registered'); return; }
+        
+        const newUser = {
+            name, email, password: pass, balance: 0, totalInvested: 0, totalEarned: 0,
+            activeInvestment: 0, pendingDepositAmount: 0, investments: [],
+            transactions: [{type:'Welcome Bonus', amount:1000, date:new Date().toISOString(), status:'completed'}],
+            created: new Date().toISOString()
+        };
+        users.push(newUser);
+        await saveUsers(users);
+        alert('✅ Account created!');
+        window.showLogin();
+    };
+
+    window.login = async function() {
+        const email = document.getElementById('login-email').value.trim().toLowerCase();
+        const pass = document.getElementById('login-pass').value;
+        const users = await getUsers();
+        const user = users.find(u=>u.email===email && u.password===pass);
+        
+        if(!user) { alert('Invalid email or password'); return; }
+        sessionStorage.setItem('nexora_session', email);
+        document.getElementById('page-auth').style.display='none';
+        document.getElementById('tab-bar').style.display='flex';
+        switchTab('dashboard');
+        await refreshUI();
+    };
+
+    window.logout = function() {
+        sessionStorage.removeItem('nexora_session');
+        location.reload();
+    };
+
+    async function refreshUI() {
+        const user = await getCurrentUser();
+        if(!user) return;
+        document.getElementById('display-balance').innerText = '₦' + (user.balance||0).toLocaleString();
+        document.getElementById('display-invested').innerText = '₦' + (user.totalInvested||0).toLocaleString();
+        document.getElementById('display-projected').innerText = '₦' + ((user.activeInvestment||0) * 2).toLocaleString();
+        document.getElementById('profile-name').innerText = user.name;
+        document.getElementById('profile-email').innerText = user.email;
+    }
+
+    window.submitDeposit = async function() {
+        const amt = parseInt(document.getElementById('deposit-amount').value);
+        if(!amt || amt < 10000) { alert('Minimum deposit is ₦10,000'); return; }
+        let users = await getUsers();
+        const idx = users.findIndex(u => u.email === sessionStorage.getItem('nexora_session'));
+        if(idx === -1) return;
+        users[idx].pendingDepositAmount = (users[idx].pendingDepositAmount||0) + amt;
+        await saveUsers(users);
+        document.getElementById('deposit-status').innerHTML = '✅ Deposit submitted! Wait for admin confirmation.';
+        document.getElementById('deposit-amount').value = '';
+    };
+
+    window.investNow = async function(amount) {
+        const user = await getCurrentUser();
+        if(!user || (user.balance||0) < amount) { alert('Insufficient balance!'); return; }
+        let users = await getUsers();
+        const idx = users.findIndex(u => u.email === user.email);
+        users[idx].balance -= amount;
+        users[idx].totalInvested = (users[idx].totalInvested||0) + amount;
+        users[idx].activeInvestment = (users[idx].activeInvestment||0) + amount;
+        await saveUsers(users);
+        alert('✅ Invested ₦' + amount.toLocaleString() + ' successfully!');
+        await refreshUI();
+    };
+
+    window.submitWithdraw = async function() {
+        const amt = parseInt(document.getElementById('withdraw-amount').value);
+        const user = await getCurrentUser();
+        if(!user || (user.balance||0) < amt) { alert('Insufficient balance'); return; }
+        let users = await getUsers();
+        const idx = users.findIndex(u=>u.email===user.email);
+        users[idx].balance -= amt;
+        await saveUsers(users);
+        alert('⏳ Withdrawal request submitted!');
+        await refreshUI();
+    };
+
+    function switchTab(name) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('page-'+name).classList.add('active');
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        document.querySelector(`.tab-item[data-tab="${name}"]`)?.classList.add('active');
+        refreshUI();
+    }
+
+    window.promptAdmin = function() {
+        const pwd = prompt('Enter admin password:');
+        if(pwd === 'nexora2026') {
+            document.getElementById('page-auth').style.display='none';
+            document.getElementById('tab-bar').style.display='none';
+            document.getElementById('admin-panel').classList.add('open');
+            renderAdminUsers();
+        } else if(pwd !== null) {
+            alert('Wrong password');
+        }
+    };
+
+    window.closeAdmin = function() {
+        document.getElementById('admin-panel').classList.remove('open');
+        if(sessionStorage.getItem('nexora_session')) {
+            document.getElementById('tab-bar').style.display='flex';
+            switchTab('dashboard');
+        } else {
+            document.getElementById('page-auth').style.display='block';
+        }
+    };
+
+    async function renderAdminUsers() {
+        const users = await getUsers();
+        const container = document.getElementById('admin-users-list');
+        container.innerHTML = users.map(u => `
+            <div class="admin-user">
+                <strong>${u.name}</strong> (${u.email})<br>
+                Balance: ${(u.balance||0).toLocaleString()} | Active: ₦${(u.activeInvestment||0).toLocaleString()}
+                <div class="actions">
+                    <input type="number" id="bal-edit-${u.email}" placeholder="Amount" style="width:90px;" />
+                    <button class="admin-btn" onclick="addBalance('${u.email}')">+ Add</button>
+                    <button class="admin-btn green" onclick="releaseProfit('${u.email}')">Release Profit</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    window.addBalance = async function(email) {
+        const amt = parseInt(document.getElementById('bal-edit-'+email).value);
+        if(!amt || amt<1) return;
+        let users = await getUsers();
+        const idx = users.findIndex(u=>u.email===email);
+        if(idx===-1) return;
+        users[idx].balance = (users[idx].balance||0) + amt;
+        await saveUsers(users);
+        document.getElementById('bal-edit-'+email).value='';
+        await renderAdminUsers();
+    };
+
+    window.releaseProfit = async function(email) {
+        let users = await getUsers();
+        const idx = users.findIndex(u=>u.email===email);
+        if(idx===-1) return;
+        const investAmt = users[idx].activeInvestment || 0;
+        if(investAmt <= 0) { alert('No active investment'); return; }
+        users[idx].balance = (users[idx].balance||0) + investAmt + investAmt;
+        users[idx].activeInvestment = 0;
+        await saveUsers(users);
+        alert('✅ Profit released!');
+        await renderAdminUsers();
+    };
+
+    (async function init() {
+        if(sessionStorage.getItem('nexora_session')) {
+            const user = await getCurrentUser();
+            if(user) {
+                document.getElementById('page-auth').style.display='none';
+                document.getElementById('tab-bar').style.display='flex';
+                switchTab('dashboard');
+            } else {
+                sessionStorage.removeItem('nexora_session');
+            }
+        }
+        
+        const tickerNames = ["Chidi","Ngozi","Emeka","Fatima"];
+        setInterval(() => {
+            const name = tickerNames[Math.floor(Math.random()*tickerNames.length)];
+            const amount = [10000, 50000, 100000][Math.floor(Math.random()*3)];
+            document.getElementById('live-ticker').innerHTML = `🚀 ${name} invested ${amount.toLocaleString()} <i>•</i> ` + document.getElementById('live-ticker').innerHTML.substring(0,150);
+        }, 4000);
+
+        let globalCount = 298000000;
+        setInterval(() => {
+            globalCount += Math.floor(Math.random()*50)+10;
+            document.getElementById('global-users').innerText = globalCount.toLocaleString();
+        }, 3000);
+    })();
+</script>
+</body>
+</html>
